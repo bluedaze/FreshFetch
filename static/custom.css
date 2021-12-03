@@ -2,50 +2,44 @@ h1 {
     justify-content-md-center;
 }
 
-a.lname:link {
+a.lname:visited, a.lname:link {
     font-family: 'Oswald', sans-serif;
     color: #212529;
     text-decoration: none;
 }
 
-a.lname:visited {
-    font-family: 'Oswald', sans-serif;
-    color: #212529;
-    text-decoration: none;
-}
-
-a.lname:hover {
+a.lname:hover, a.lname:active {
     font-family: 'Oswald', sans-serif;
     color: #616161;
 
 }
 
-a.lname:active {
-    font-family: 'Oswald', sans-serif;
-    color: #616161;
-
-}
-
-
-a.cname:link {
-    font-family: 'Oswald', sans-serif;
-    color: #c1c1c1;
+.rockSalt {
+    font-family: 'Rock Salt';
+    color: #ffc107;
     text-decoration: none;
+    text-shadow: 4px 4px 4px #000;
 }
 
-a.cname:visited {
-    font-family: 'Oswald', sans-serif;
-    color: #c1c1c1;
+a.hlink:visited, a.hlink:link {
+    font-family: 'Rock Salt';
+    color: #ffc107;
     text-decoration: none;
+    text-shadow: 4px 4px 4px #000;
 }
 
-a.cname:hover {
-    font-family: 'Oswald', sans-serif;
+a.hlink:hover, a.hlink:active {
+    font-family: 'Rock Salt';
     color: #7e7e7e;
-
 }
 
-a.cname:active {
+a.cname:link, a.cname:visited {
+    font-family: 'Oswald', sans-serif;
+    color: #c1c1c1;
+    text-decoration: none;
+}
+
+a.cname:hover, a.cname:active {
     font-family: 'Oswald', sans-serif;
     color: #7e7e7e;
 

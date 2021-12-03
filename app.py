@@ -1,13 +1,13 @@
+from __future__ import unicode_literals
 import requests
 import requests.auth
-from flask import Flask
-from flask import render_template
-import time
+from flask import Flask, render_template
 from credentials import CLIENT_ID, SECRET_TOKEN
+import youtube_dl
 
 app = Flask(__name__)
 
-class Post:
+class Thread:
     def __init__(self):
         self.post_id = ""
         self.tag = ""
@@ -17,17 +17,20 @@ class Post:
         self.tokens = []
         self.comments = []
         self.feat = []
-
+        self.text = ""
 
 class Tokenizer:
     def __init__(self, child):
-        self.url = child["data"]["url"]
+        self.thread = Thread()
+        self.constructToken(child)
         self.pos = 0
-        self.text = child["data"]["title"]
         self.char = ""
-        self.post = Post()
-        self.tokens = []
-        self.parseText()
+
+    def constructToken(self, child):
+        self.thread.text = child["data"]["title"]
+        self.thread.url = child["data"]["url"]
+        self.tokens = self.thread.tokens
+        self.text = self.thread.text
 
     def normalizeCharacters(self):
         # There are some characters that look weird, or are harder to parse. So we discard those.
@@ -51,25 +54,6 @@ class Tokenizer:
             except:
                 return None
 
-    def qmOperator(self):
-        position = self.pos
-        result = ""
-        result += self.char
-        if self.peek() == "v":
-            self.nextChar()
-            result += self.char
-            if self.peek() == "=":
-                self.nextChar()
-                result += self.char
-                self.addToken(self.char)
-            else:
-                self.pos == position
-        else:
-            self.addToken(self.char)
-
-    def slashOperator(self):
-        self.nextChar()
-
     def addToken(self, result):
         self.tokens.append(result)
         self.nextChar()
@@ -84,10 +68,6 @@ class Tokenizer:
             self.getID()
         elif self.char.isspace():
             self.addToken(self.char)
-        elif self.char == "/":
-            self.slashOperator()
-        elif self.char == "?":
-            self.qmOperator()
         elif self.char:
             self.addToken(self.char)
         else:
@@ -98,35 +78,22 @@ class Tokenizer:
         self.char = self.text[self.pos]
         while self.pos < len(self.text):
             self.createToken()
-
+        return self.thread
 
 class parser:
     def __init__(self, child):
-        tokens = Tokenizer(child)
-        self.url = child["data"]["url"]
-        self.post = Post()
-        self.name = ""
-        self.tokens = tokens.tokens
+        self.thread = Tokenizer(child).parseText()
+        self.tokens = self.thread.tokens
         self.pos = 0
-        self.currentToken = self.tokens[self.pos]
-        self.mainLoop()
-
-    def getVideo(self):
-        pass
+        self.currentToken = self.thread.tokens[self.pos]
+        self.parse()
 
     def parseParens(self):
         comment = ""
         while self.currentToken != ")":
-            if self.currentToken.isalnum():
-                comment += self.currentToken
-                self.advance()
-            elif self.currentToken.isspace():
-                comment += self.currentToken
-                self.advance()
-            else:
-                comment += self.currentToken
-                self.advance()
-        self.post.comments.append(comment)
+            comment += self.currentToken
+            self.advance()
+        self.thread.comments.append(comment)
         self.advance()
 
     def advance(self):
@@ -142,38 +109,24 @@ class parser:
 
     def parseSquarebrackets(self):
         tag = ""
+        keywords = ["fresh", "video", "album", "EP"]
         while self.currentToken != "]":
-            if self.currentToken.lower() == "fresh":
-                tag += self.currentToken.upper()
-                self.advance()
-            elif self.currentToken.isspace():
-                tag += self.currentToken.upper()
-                self.advance()
-            elif self.currentToken.lower() == "video":
-                tag += self.currentToken.upper()
-                self.advance()
-            elif self.currentToken.lower() == "album":
+            if self.currentToken.lower() in keywords or self.currentToken.isspace():
                 tag += self.currentToken.upper()
                 self.advance()
             else:
                 self.advance()
-        self.post.tag = tag
+        self.thread.tag = tag
         self.advance()
 
     def getName(self):
         stopChars = ["(", "["]
         while self.pos < len(self.tokens):
-            if self.currentToken.isalnum():
-                self.name += self.currentToken
-                self.advance()
-            elif self.currentToken.isspace():
-                self.name += self.currentToken
-                self.advance()
-            elif self.currentToken in stopChars:
-                self.name = self.name.rstrip()
+            if self.currentToken in stopChars:
+                self.thread.name = self.thread.name.rstrip()
                 break
-            else:
-                self.name += self.currentToken
+            elif self.currentToken:
+                self.thread.name += self.currentToken
                 self.advance()
 
     def containAlphaNum(self):
@@ -196,41 +149,10 @@ class parser:
         else:
             self.getName()
 
-    def getThumbnail(self):
-        urls = ["maxresdefault.jpg", "sddefault.jpg", "hqdefault.jpg", "default.jpg"]
-        image = ""
-        for url in urls:
-            image = f"https://i.ytimg.com/vi/{self.post.post_id}/{url}"
-            r = requests.get(image)
-            if r.status_code == 200:
-                break
-            elif r.status_code == 404:
-                time.sleep(0.5)
-        self.post.image = image
-
-    def checkForYoutubeLink(self):
-        ytid = None
-        if self.url[0:32] == "https://www.youtube.com/watch?v=":
-            ytid = self.url[32:43]
-        elif self.url[0:30] == "https://m.youtube.com/watch?v=":
-            ytid = self.url[30:41]
-        elif self.url[0:28] == "https://youtube.com/watch?v=":
-            ytid = self.url[28:39]
-        elif self.url[0:16] == "https://youtu.be":
-            ytid = self.url[17:28]
-        else:
-            pass
-        self.post.post_id = ytid
-        self.post.url = self.url
-
-    def mainLoop(self):
+    def parse(self):
         while self.pos < len(self.tokens):
             self.parseTokens()
-        if self.post.tag.upper() == "FRESH VIDEO":
-            self.checkForYoutubeLink()
-            self.getThumbnail()
-        self.post.name = self.name
-
+        return self.thread
 
 class redditRequest:
     def __init__(self):
@@ -245,9 +167,7 @@ class redditRequest:
         self.main()
 
     def getToken(self):
-        client_auth = requests.auth.HTTPBasicAuth(
-            CLIENT_ID, SECRET_TOKEN
-        )
+        client_auth = requests.auth.HTTPBasicAuth(CLIENT_ID, SECRET_TOKEN)
         post_data = {"grant_type": "client_credentials"}
         response = requests.post(
             "https://www.reddit.com/api/v1/access_token",
@@ -270,18 +190,35 @@ class redditRequest:
         response = res.json()
         return response
 
+    def pingYoutube(self, thread):
+        isVideo = True
+        ydl = youtube_dl.YoutubeDL({"simulate": True, "quiet": True, "forcethumbnail": True})
+        with ydl:
+            try:
+                result = ydl.extract_info(thread.url, download=False, ie_key="Youtube")
+                thread.url = result["webpage_url"]
+                thread.image = result["thumbnails"][-1]["url"]
+            except Exception as e:
+                isVideo = False
+        return isVideo
+
+    def configureVideo(self, thread):
+        isVideo = self.pingYoutube(thread)
+        if isVideo:
+            self.videos.append(thread)
+
     def parseRequest(self, response):
         children = response["data"]["children"]
         self.index = children[-1]["data"]["name"]
         for child in children:
             if child["data"]["ups"] >= 10:
-                data = parser(child)
-                if data.post.tag == "FRESH":
-                    self.tracks.append(data.post)
-                elif data.post.tag == "FRESH VIDEO":
-                    self.videos.append(data.post)
-                elif data.post.tag == "FRESH ALBUM":
-                    self.albums.append(data.post)
+                thread = parser(child).parse()
+                if thread.tag == "FRESH":
+                    self.tracks.append(thread)
+                elif thread.tag == "FRESH VIDEO":
+                    self.configureVideo(thread)
+                elif thread.tag == "FRESH ALBUM":
+                    self.albums.append(thread)
 
     def main(self):
         # We call three times because Reddit search api only returns data the first three times
@@ -298,9 +235,11 @@ class redditRequest:
 
 
 @app.route("/")
-@app.route('/index')
+@app.route("/index")
 def main():
+    print("Creating new request")
     newRequest = redditRequest()
+    print("Request retrieved")
     if __name__ == "__main__":
         pass
     else:
@@ -309,15 +248,9 @@ def main():
             videos=newRequest.videos,
             tracks=newRequest.tracks,
             albums=newRequest.albums,
-            posts=newRequest.data,
             zip=zip,
         )
 
-@app.route("/start")
-def start():
-    return render_template(
-        "start.html"
-    )
-
 if __name__ == "__main__":
     main()
+    thread = "https://www.youtube.com/watch?v=yGYuDtF5AnE"
