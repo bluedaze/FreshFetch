@@ -2,16 +2,40 @@ h1 {
     justify-content-md-center;
 }
 
-a.lname:visited, a.lname:link {
+.btn.lname:visited, .btn.lname:link {
     font-family: 'Oswald', sans-serif;
     color: #212529;
     text-decoration: none;
 }
 
-a.lname:hover, a.lname:active {
+.btn.lname:hover, .btn.lname:active {
     font-family: 'Oswald', sans-serif;
     color: #616161;
 
+}
+
+.overme {
+        width: 300px;
+        overflow:hidden;
+        white-space:nowrap;
+        text-overflow: ellipsis;
+        color: red;
+    }
+
+.btn-link {
+    font-family: 'Oswald', sans-serif;
+    color: #212529;
+    text-decoration: none;
+}
+
+.dropdown-toggle.caret-off::after {
+    display: none;
+}
+
+
+.btn:focus, .btn:active {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .rockSalt {
@@ -71,7 +95,7 @@ a.cname:hover, a.cname:active {
 
 .card-img-top {
     width: 100%;
-    height: 20vw;
+    height: 35vw;
     object-fit: contain;
 }
 
@@ -89,30 +113,38 @@ a.cname:hover, a.cname:active {
 .card-text{
     font-size:20px;
     text-overflow: ellipsis;
-    height: 40px;
+    height: 30px;
     white-space: nowrap;
     overflow: hidden;
 }
 
-.btn {
-    background-color:transparent
+.card{
+    max-height: 30vw;
+}
+
+.text-left {
+  text-align: left !important;
 }
 
 body {
     background-color:  #212529;
 }
 
-.card {
-    max-height: 480px;
+.carousel-card {
+    max-height: 490px;
     border: 0;
     border-radius: 0 !important;
     color: black !important;
     background-color: black !important;
 }
 
+.dropdown-card {
+    background-color: #FFFFFF !important;
+}
+
 .carousel-caption {
    position: absolute;
-   bottom:10px
+   bottom: 10px
 }
 
 
