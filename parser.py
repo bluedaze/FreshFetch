@@ -6,18 +6,17 @@ class Tokenizer:
         self.char = ""
 
     def spawnThread(self):
-        thread = {"post_id": "",
-                  "reddit_id": "",
+        thread = {"reddit_id": "",
                   "tag": "",
                   "url": "",
                   "image": "",
                   "name": "",
                   "tokens": [],
                   "comments": [],
-                  "feat": [],
                   "text": "",
                   "ytid": "",
-                  "ups": ""}
+                  "ups": "",
+                  "time_posted": ""}
         return thread
 
     def constructToken(self, child):
@@ -25,6 +24,8 @@ class Tokenizer:
         self.thread["url"] = child["data"]["url"]
         self.thread["reddit_id"] = child["data"]["id"]
         self.thread["ups"] = child["data"]["ups"]
+        self.thread["time_posted"] = child["data"]["created_utc"]
+        self.thread["reddit_url"] = f"https://www.reddit.com{child['data']['permalink']}"
 
     def sanitize(self):
         # There are some characters that look weird,
@@ -33,6 +34,8 @@ class Tokenizer:
             self.thread["text"] = self.thread["text"].replace("&amp;", "&")
         if "–" in self.thread["text"]:
             self.thread["text"] = self.thread["text"].replace("–", "-")
+        if "—" in self.thread["text"]:
+            self.thread["text"] = self.thread["text"].replace("—", "-")
 
     def getID(self):
         result = ""
@@ -81,7 +84,6 @@ class Parser:
         self.tokens = self.thread["tokens"]
         self.pos = 0
         self.currentToken = self.thread["tokens"][self.pos]
-        self.parse()
 
     def parseParens(self):
         comment = ""
@@ -105,7 +107,7 @@ class Parser:
     def parseSquarebrackets(self):
         tag = ""
         keywords = ["fresh", "video", "album", "EP"]
-        while self.currentToken != "]":
+        while self.currentToken != "]" and self.pos < len(self.tokens):
             if self.currentToken.lower() in keywords or self.currentToken.isspace():
                 tag += self.currentToken.upper()
                 self.advance()
@@ -120,6 +122,12 @@ class Parser:
             if self.currentToken in stopChars:
                 self.thread["name"] = self.thread["name"].rstrip()
                 break
+            elif self.currentToken == "-":
+                if self.thread["name"]:
+                    self.thread["name"] += self.currentToken
+                    self.advance()
+                else:
+                    self.advance()
             elif self.currentToken:
                 self.thread["name"] += self.currentToken
                 self.advance()
@@ -147,4 +155,5 @@ class Parser:
     def parse(self):
         while self.pos < len(self.tokens):
             self.parseTokens()
+        print(self.thread["name"])
         return self.thread
