@@ -1,0 +1,13 @@
+<html>
+{% include 'head.html' %}
+<body>
+      <div class = "loginContent">
+      <H1 class="rockSalt">Please Login</H1>
+      <hr>
+      <form action="" method="post">
+        <input type="text" placeholder="Username" name="username" value="{{request.form.username }}">
+        <input type="password" placeholder="Password" name="password" value="{{request.form.password }}">
+      </form>
+      </div>
+</body>
+</html>

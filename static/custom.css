@@ -1,6 +1,30 @@
 h1 {
     justify-content-md-center;
 }
+.fa {
+    display:inline;
+}
+
+.loginContent {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    padding: 10px;
+}
+
+
+
+.navbar-brand
+{
+    font-family: 'Rock Salt';
+    color: #ffc107 !important;
+    text-decoration: none;
+}
+
+.fa-layers-text {
+    display:inline;
+}
 
 .btn.lname:visited, .btn.lname:link {
     font-family: 'Oswald', sans-serif;

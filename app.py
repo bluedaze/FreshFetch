@@ -1,15 +1,21 @@
-from __future__ import unicode_literals
-import requests
+from flask import Flask, render_template, redirect, url_for, request
 import requests.auth
-from flask import Flask, render_template
-from credentials import *
-import yt_dlp
-from parser import Parser
+import requests
 import pickle
 import uuid
+from parser import Parser
+from credentials import *
 from psdb import *
+from requests.exceptions import *
+import atexit
+from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
+
+# Debug variable.
+# "save" to go fetch data from the api
+# "load" to use a pickle that you already have
+pickle_status = "load"
 
 
 class RedditRequest:
@@ -62,7 +68,6 @@ class RedditRequest:
         count = 0
         for i in range(3):
             count += 1
-            print(count)
             request = self.request_posts()
             response = request["data"]["children"]
             self.parse_response(response)
@@ -82,45 +87,97 @@ class ParseResponse:
         self.parse_data()
 
     def parse_data(self):
+        count = 0
         for thread in self.data:
+            count = count + 1
             if thread["tag"] == "FRESH":
                 self.configure_track(thread)
             elif thread["tag"] == "FRESH VIDEO":
                 self.configure_video(thread)
             elif thread["tag"] == "FRESH ALBUM" or thread["tag"] == "FRESH EP":
                 self.albums.append(thread)
-        data_dict = {"albums": self.albums, "tracks": self.tracks, "videos": self.videos}
+        data_dict = {
+            "albums": self.albums,
+            "tracks": self.tracks,
+            "videos": self.videos,
+        }
         self.data = data_dict
 
-    def ping_youtube(self, thread):
-        is_video = True
-        ydl = yt_dlp.YoutubeDL({"simulate": True, "quiet": True, "preference": 0})
-        with ydl:
+    def get_best_thumbnail(self, video_id, is_live=False):
+        thumbnail_names = [
+            "maxresdefault", "hq720", "sddefault", "sd1", "sd2", "sd3", "hqdefault", "hq1", "hq2", "hq3", "0",
+            "mqdefault", "mq1", "mq2", "mq3", "default", "1", "2", "3"
+        ]
+        thumbnail_urls = [
+            "https://i.ytimg.com/vi{webp}/{video_id}/{name}{live}.{ext}".format(
+                video_id=video_id,
+                name=name,
+                ext=ext,
+                webp="_webp" if ext == "webp" else "",
+                live="_live" if is_live else "",
+            )
+            for name in thumbnail_names
+            for ext in ("webp", "jpg")
+        ]
+
+        for url in thumbnail_urls:
             try:
-                print("Fetching video")
-                result = ydl.extract_info(
-                    thread["url"], download=False, process=False, ie_key="Youtube"
-                )
-                thread["url"] = result["webpage_url"]
-                thread["ytid"] = result["id"]
-                thread["image"] = result["thumbnail"]
-            except Exception:
-                is_video = False
-        return is_video
+                r = requests.head(url)
+                r.raise_for_status()
+            except HTTPError:
+                continue
+            return url
+
+    def yt_is_deleted(self, ytid):
+        target_url = (
+            f"https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={ytid}"
+        )
+        response_data = requests.get(target_url)
+        return not response_data.status_code == 200
+
+    def sanitize_youtube_id(self, thread):
+        # This will work even on youtu.be domains.
+        # We split to get the youtube_id at the end of the url.
+        # Sometimes this will return data similar to the following:
+        # 'watch?v=jR4AG5LdKYE'
+        # We split based on the equations sign because that's easy.
+        ytid = thread["url"].split("/")[-1]
+        if ytid.find("=") >= 0:
+            ytid = ytid.split("=")[1]
+        if ytid.find("&amp;") > 0:
+            ytid = ytid.split("&amp;")[0]
+        return ytid
+
+    def check_youtube_url(self, thread):
+        ytid = self.sanitize_youtube_id(thread)
+        isDeleted = self.yt_is_deleted(ytid)
+        if (len(ytid) != 11) or isDeleted:
+            print(f"id is {len(ytid)} characters long: ", end="")
+            print(ytid)
+            print(f"Invalid url: {thread['url']}")
+            print("~" * 20)
+            return None
+        else:
+            thread["url"] = f"https://www.youtube.com/watch?v={ytid}"
+            return ytid
+
+    def configure_video(self, thread):
+        ytid = self.check_youtube_url(thread)
+        if ytid:
+            thread["ytid"] = ytid
+            thread["image"] = self.get_best_thumbnail(ytid)
+            thread["url"] = f"https://www.youtube.com/watch?v={ytid}"
+            self.videos.append(thread)
 
     def configure_track(self, thread):
         # This function is probably unnecessary
         # But I didn't like how there were several
+        # But I didn't like how there were several
         # url formats for YouTube links.
         is_youtube = thread["url"].find("youtu")
         if is_youtube >= 0:
-            self.ping_youtube(thread)
+            self.check_youtube_url(thread)
         self.tracks.append(thread)
-
-    def configure_video(self, thread):
-        is_video = self.ping_youtube(thread)
-        if is_video:
-            self.videos.append(thread)
 
 
 def main():
@@ -139,7 +196,6 @@ def main():
 
 
 # Created a json api.
-# Got bored, and didn't want to write a database.
 @app.route("/data.json")
 def data_json():
     request = RedditRequest()
@@ -149,6 +205,17 @@ def data_json():
         pass
     else:
         return response
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    error = None
+    if request.method == 'POST':
+        if request.form['username'] != 'admin' or request.form['password'] != 'admin':
+            error = 'Invalid Credentials. Please try again.'
+        else:
+            return redirect(url_for('home'))
+    return render_template('login.html', error=error)
+
 
 
 # The pickle stuff is pretty useful for rapid prototyping
@@ -173,7 +240,7 @@ def start_app():
     return response.data
 
 
-def pickeler(pickle_status):
+def pickeler():
     response = ""
     if pickle_status == "load":
         response = load_pickle()
@@ -186,37 +253,38 @@ def pickeler(pickle_status):
 
 
 @app.route("/")
-@app.route("/index")
-@app.route("/table")
 def render_table():
     db = DB()
     response = db.query()
-    if __name__ == "__main__":
-        pass
-    else:
-        return render_template(
-            "table.html",
-            videos=response["videos"],
-            tracks=response["tracks"],
-            albums=response["albums"],
-            zip=zip,
-            uuid=uuid,
-        )
-
-# Need to update this, since it is no longer useful.
-# def db_insert_response():
-#     response = pickeler("save")
-#     for key, value in response.items():
-#         db_insert(key, value)
+    return render_template(
+        "base.html",
+        videos=response["videos"],
+        tracks=response["tracks"],
+        albums=response["albums"],
+        zip=zip,
+        uuid=uuid,
+    )
 
 
-# This route is useful for prototyping
-# some js or w/e real quick.
-@app.route("/test")
-def test_fetch():
-    response = pickeler("save")
-    return render_template("test.html", videos=response.videos)
+def db_insert_response():
+    response = pickeler()
+    db = DB()
+    for key, value in response.items():
+        db.insert(key, value)
+
+
+def db_create_database():
+    db = DB()
+    response = pickeler()
+    for key, value in response.items():
+        db.createDatabase(key)
+        db.insert(key, value)
 
 
 if __name__ == "__main__":
-    render_table()
+    db_insert_response()
+    sched = BackgroundScheduler(daemon=True)
+    sched.add_job(db_insert_response, "interval", minutes=60)
+    sched.start()
+    atexit.register(lambda: sched.shutdown())
+    app.run()

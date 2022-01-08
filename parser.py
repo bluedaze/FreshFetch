@@ -6,26 +6,30 @@ class Tokenizer:
         self.char = ""
 
     def spawnThread(self):
-        thread = {"reddit_id": "",
-                  "tag": "",
-                  "url": "",
-                  "image": "",
-                  "name": "",
-                  "tokens": [],
-                  "comments": [],
-                  "text": "",
-                  "ytid": "",
-                  "ups": "",
-                  "time_posted": ""}
+        thread = {
+            "reddit_id": "",
+            "tag": "",
+            "url": "",
+            "image": "",
+            "name": "",
+            "tokens": [],
+            "comments": [],
+            "text": "",
+            "ytid": "",
+            "ups": 0,
+            "ts": "",
+        }
         return thread
 
     def constructToken(self, child):
         self.thread["text"] = child["data"]["title"]
         self.thread["url"] = child["data"]["url"]
         self.thread["reddit_id"] = child["data"]["id"]
-        self.thread["ups"] = child["data"]["ups"]
-        self.thread["time_posted"] = child["data"]["created_utc"]
-        self.thread["reddit_url"] = f"https://www.reddit.com{child['data']['permalink']}"
+        self.thread["ups"] = int(child["data"]["ups"])
+        self.thread["ts"] = child["data"]["created_utc"]
+        self.thread[
+            "reddit_url"
+        ] = f"https://www.reddit.com{child['data']['permalink']}"
 
     def sanitize(self):
         # There are some characters that look weird,
@@ -77,6 +81,7 @@ class Tokenizer:
         while self.pos < len(self.thread["text"]):
             self.createToken()
         return self.thread
+
 
 class Parser:
     def __init__(self, child):
@@ -155,5 +160,4 @@ class Parser:
     def parse(self):
         while self.pos < len(self.tokens):
             self.parseTokens()
-        print(self.thread["name"])
         return self.thread

@@ -1,5 +1,3 @@
-{% extends "base.html" %}
-{% block content %}
 <div class="row">
     <div class="col">
         <ul class="list-group list-group-horizontal">
@@ -9,24 +7,50 @@
         {% for track, album in zip(tracks, albums) %}
         <ul class="list-group list-group-horizontal">
         <li class="list-group-item text-start list-group-item-action ">
-                <button class="btn btn-link lname text-left" type="button" data-bs-toggle="collapse" data-bs-target="#{{ track['reddit_id'] }}" aria-expanded="false" aria-controls="{{ track['reddit_id'] }}" style="width:100%">
+                <button
+                        class="btn btn-link lname text-left"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#{{ track['reddit_id'] }}"
+                        aria-expanded="false"
+                        aria-controls="{{ track['reddit_id'] }}"
+                        style="width:100%"
+                >
                     {{ track.name }}
                 </button>
             <div class="collapse" id="{{ track['reddit_id'] }}">
                 <div class="card card-body dropdown-card shadow p-3 mb-5 bg-body rounded">
-                    <a href="{{ album['reddit_url'] }}">Original Reddit Thread</a><br>
-                    <span><br><a href="#">Amazon</a> || <a href="#">Apple Music</a> || <a href="#">Bandcamp</a> || <a href="#">Deezer</a> || <a href="#">Soundcloud</a> || <a href="#">Spotify</a> || <a href="#">Tidal</a> || <a href="#">YouTube Music</a></span>
+                    <a href="{{ track['reddit_url'] }}">Original Reddit Thread</a><br>
+                    <span>
+                        <br>
+                        <a href="#">Amazon</a> || <a href="#">Apple Music</a> || <a href="#">Bandcamp</a> ||
+                        <a href="#">Deezer</a> || <a href="#">Soundcloud</a> || <a href="#">Spotify</a> ||
+                        <a href="#">Tidal</a> || <a href="#">YouTube Music</a>
+                    </span>
                 </div>
             </div>
         </li>
         <li class="list-group-item text-start list-group-item-action ">
-                <button class="btn btn-link lname text-left" type="button" data-bs-toggle="collapse" data-bs-target="#{{ album['reddit_id'] }}" aria-expanded="false" aria-controls="{{ album['reddit_id'] }}" style="width:100%">
+                <button
+                        class="btn btn-link lname text-left"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#{{ album['reddit_id'] }}"
+                        aria-expanded="false"
+                        aria-controls="{{ album['reddit_id'] }}"
+                        style="width:100%"
+                >
                     {{ album.name }}
                 </button>
             <div class="collapse" id="{{ album['reddit_id'] }}">
                 <div class="card card-body dropdown-card shadow p-3 mb-5 bg-body rounded">
                     <a href="{{ album['reddit_url'] }}">Original Reddit Thread</a><br>
-                    <span><br><a href="#">Amazon</a> || <a href="#">Apple Music</a> || <a href="#">Bandcamp</a> || <a href="#">Deezer</a> || <a href="#">Soundcloud</a> || <a href="#">Spotify</a> || <a href="#">Tidal</a> || <a href="#">YouTube Music</a></span>
+                    <span>
+                        <br>
+                        <a href="#">Amazon</a> || <a href="#">Apple Music</a> || <a href="#">Bandcamp</a> ||
+                        <a href="#">Deezer</a> || <a href="#">Soundcloud</a> || <a href="#">Spotify</a> ||
+                        <a href="#">Tidal</a> || <a href="#">YouTube Music</a>
+                    </span>
                 </div>
             </div>
         </li>
@@ -34,4 +58,3 @@
         {% endfor %}
     </div>
 </div>
-{% endblock %}
