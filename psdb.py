@@ -3,12 +3,13 @@ import psycopg2.extras
 from credentials import db_password
 from datetime import datetime
 import datetime as DT
+from operator import itemgetter
 
-# I'm using postgres, because everyone seems to think it's the best
-# I think I still prefer sqlite. This is great for like website stuff
-# but I think I prefer most of the things I make to be self encapsulated.
-# Like, you don't need to setup a database, and you can just run it
-# without thinking about the overhead.
+# I'm using postgres, because everyone seems to think it's the best.
+# I think I still prefer sqlite. Postgres is great for when building a
+# website but I think I prefer most of the things I make to be self
+# encapsulated with sqlite. With sqlite you don't need to setup a
+# database, and you can  just run it without thinking about the overhead.
 
 
 class DB:
@@ -30,7 +31,10 @@ class DB:
         # This is much easier to parse in table.html than the tuples
         # that it was originally returning.
         now = datetime.now()
-        week_ago = now - DT.timedelta(days=7)
+        numDays = 14
+        if numDays > 30:
+            numDays = 30
+        week_ago = now - DT.timedelta(days=numDays)
         with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
             cur.execute(
                 f"SELECT * FROM {item_type} WHERE ts BETWEEN %s and %s;",
@@ -40,16 +44,17 @@ class DB:
         return results
 
     def query(self):
-        # Started playing some code golf, because I was getting bored with this project.
-        # In retrospect this was stupid, and I need to make this more readable.
-        # TODO: Make more readable
         with self.create_con() as conn, conn.cursor() as cur:
             cur.execute(
                 "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';",
             )
-            data_dict = {
-                table[0]: self.create_dict(conn, table[0]) for table in cur.fetchall()
-            }
+            results = [query[0] for query in cur.fetchall()]
+            data_dict = {}
+            for result in results:
+                table = self.create_dict(conn, result)
+                # Sort data according to the number of "ups" aka upvotes
+                # Then append it to the data_dict
+                data_dict[result] = sorted(table, key=itemgetter("ups"))[::-1]
         return data_dict
 
     def insert(self, key, values):
