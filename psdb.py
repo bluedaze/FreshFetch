@@ -3,7 +3,6 @@ import psycopg2.extras
 from credentials import db_password
 from datetime import datetime
 import datetime as DT
-from operator import itemgetter
 
 # I'm using postgres, because everyone seems to think it's the best
 # I think I still prefer sqlite. This is great for like website stuff
@@ -42,6 +41,8 @@ class DB:
 
     def query(self):
         # Started playing some code golf, because I was getting bored with this project.
+        # In retrospect this was stupid, and I need to make this more readable.
+        # TODO: Make more readable
         with self.create_con() as conn, conn.cursor() as cur:
             cur.execute(
                 "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';",
@@ -80,6 +81,7 @@ class DB:
 
     @staticmethod
     def createDatabase(key):
+        print("Creating database")
         conn = psycopg2.connect(
             user="sean",
             password=db_password,
@@ -93,3 +95,13 @@ class DB:
                 f"CREATE TABLE {key} (reddit_id TEXT UNIQUE, tag TEXT, url TEXT, image TEXT, name TEXT, text TEXT, ytid TEXT, ups SMALLINT, ts TIMESTAMP, reddit_url TEXT);"
             )
             conn.commit()
+
+    def db_insert_response(self, response):
+        print("Inserting new data into database")
+        for key, value in response.items():
+            self.insert(key, value)
+
+    def db_create_database(self, response):
+        for key, value in response.items():
+            self.createDatabase(key)
+            self.insert(key, value)
