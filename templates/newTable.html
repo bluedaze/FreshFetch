@@ -1,10 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
+<html lang="en" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
+{% include 'head.html' %}
 <body>
-$END$
+<div class="container">
+  <div class="row g-0">
+    <div class="col">
+      <table class="table table-bordered table-striped table-hover table-dark">
+        <thead>
+        <tr>
+          <th scope="col"></th>
+          <th class="text-center table-header" scope="col">Tracks</th>
+        </tr>
+        </thead>
+        <tbody>
+          {% for track in tracks %}
+          <tr>
+            <th style="width: 10%" scope="row">{{ track.ups }}</th>
+            <td>{{ track.name }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="col">
+      <div class="col">
+        <table class="table table-bordered table-striped table-hover table-dark">
+          <thead>
+          <tr>
+            <th scope="col"></th>
+            <th class="text-center table-header" scope="col">Albums</th>
+          </tr>
+          </thead>
+          <tbody>
+            {% for album in albums %}
+            <tr>
+              <th style="width: 7%" scope="row">
+                {{ album.ups }}
+              </th>
+              <td>{{ album.name }}</td>
+            </tr>
+            {% endfor %}
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>

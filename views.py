@@ -5,8 +5,37 @@ from psdb import *
 def render_table():
     db = DB()
     response = db.query()
+    # The list of tracks is almost always larger than tracks
+    # so we delete them so that the lists are the same size.
+    # We find the absolute value between the two lists
+    # then we delete that number from the end of the list.
+    # We delete from the end of the list so the most popular
+    # items are still displayed.
+    difference =  abs(len(response["tracks"]) - len(response["albums"]))
+    del response["tracks"][-difference:]
     return render_template(
         "base.html",
+        videos=response["videos"],
+        tracks=response["tracks"],
+        albums=response["albums"],
+        zip=zip,
+        uuid=uuid,
+    )
+
+
+def render_new_table():
+    db = DB()
+    response = db.query()
+    # The list of tracks is almost always larger than tracks
+    # so we delete them so that the lists are the same size.
+    # We find the absolute value between the two lists
+    # then we delete that number from the end of the list.
+    # We delete from the end of the list so the most popular
+    # items are still displayed.
+    difference =  abs(len(response["tracks"]) - len(response["albums"]))
+    del response["tracks"][-difference:]
+    return render_template(
+        "newTable.html",
         videos=response["videos"],
         tracks=response["tracks"],
         albums=response["albums"],

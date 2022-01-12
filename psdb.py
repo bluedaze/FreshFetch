@@ -4,6 +4,9 @@ from credentials import db_password
 from datetime import datetime
 import datetime as DT
 from operator import itemgetter
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 # I'm using postgres, because everyone seems to think it's the best.
 # I think I still prefer sqlite. Postgres is great for when building a
@@ -86,7 +89,6 @@ class DB:
 
     @staticmethod
     def createDatabase(key):
-        print("Creating database")
         conn = psycopg2.connect(
             user="sean",
             password=db_password,
@@ -102,7 +104,7 @@ class DB:
             conn.commit()
 
     def db_insert_response(self, response):
-        print("Inserting new data into database")
+        logging.debug("Inserting new data into database")
         for key, value in response.items():
             self.insert(key, value)
 

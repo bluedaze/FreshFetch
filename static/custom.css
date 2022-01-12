@@ -5,6 +5,16 @@ h1 {
     display:inline;
 }
 
+.table-header {
+    color: #ffc107;
+    border:none;
+}
+
+th {
+    border:none;
+}
+
+
 .loginContent {
     position: absolute;
     left: 50%;
@@ -62,9 +72,10 @@ h1 {
   box-shadow: none !important;
 }
 
+
 .rockSalt {
     font-family: 'Rock Salt';
-    color: #ffc107;
+    color: #ffc107 !important;
     text-decoration: none;
     text-shadow: 4px 4px 4px #000;
 }
