@@ -9,18 +9,14 @@ import pickle
 # Debug variable.
 # "save" to go fetch data from the api
 # "load" to use a pickle that you already have
-def debug_status():
-    status = "save"
-    return status
+class Debugger():
+    def __init__(self, status):
+        self.status = status
 
-def save_pickle(response):
-    file_to_store = open("stored_object.pickle", "wb")
-    pickle.dump(response, file_to_store)
-    file_to_store.close()
+    def save_pickle(self, response):
+        with open("stored_object.pickle", "wb") as file_to_store:
+            pickle.dump(response, file_to_store)
 
-
-def load_pickle():
-    file_to_read = open("stored_object.pickle", "rb")
-    response = pickle.load(file_to_read)
-    file_to_read.close()
-    return response
+    def load_pickle(self):
+        with open("stored_object.pickle", "rb") as file_to_read:
+            return pickle.load(file_to_read)

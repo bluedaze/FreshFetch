@@ -3,7 +3,7 @@ import requests
 from credentials import *
 from parser import Parser
 from requests.exceptions import *
-from debugTools import debug_status, load_pickle, save_pickle
+from debugTools import *
 from psdb import *
 from urllib.parse import urlparse, parse_qs
 import logging
@@ -183,15 +183,11 @@ def request_reddit_api():
     return response.data
 
 def send_request():
-    status = debug_status()
-    response = ""
-    if status == "load":
-        response = load_pickle()
-    elif status == "save":
+    debug = Debugger("save")
+    if debug.status == "load":
+        debug.load_pickle()
+    elif debug.status == "save":
         response = request_reddit_api()
-        save_pickle(response)
+        debug.save_pickle(response)
         db = DB()
         db.db_insert_response(response)
-    elif status is None:
-        response = request_reddit_api()
-    return response

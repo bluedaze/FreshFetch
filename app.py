@@ -11,7 +11,7 @@ logging.getLogger("apscheduler").setLevel(logging.WARNING)
 logging.info("Starting")
 
 if __name__ == "__main__":
-    # send_request()
+    send_request()
     sched = BackgroundScheduler(daemon=True)
     sched.add_job(send_request, "interval", minutes=60)
     sched.start()
