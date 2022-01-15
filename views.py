@@ -1,7 +1,10 @@
-from flask import render_template, redirect, url_for, request
+from flask import Flask, render_template, redirect, url_for, request
 import uuid
 from psdb import *
+app = Flask(__name__)
 
+
+@app.route("/")
 def index():
     db = DB()
     response = db.query()
@@ -22,6 +25,7 @@ def index():
         uuid=uuid,
     )
 
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
     if request.method == 'POST':
@@ -31,9 +35,7 @@ def login():
             return redirect(url_for('home'))
     return render_template('login.html', error=error)
 
-# Circular imports issue
-# TODO: Fix this
-# Created a json api.
+
 def data_json():
     db = DB()
     response = db.query()
