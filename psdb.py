@@ -6,15 +6,6 @@ import datetime as DT
 from operator import itemgetter
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
-
-# I'm using postgres, because everyone seems to think it's the best.
-# I think I still prefer sqlite. Postgres is great for when building a
-# website but I think I prefer most of the things I make to be self
-# encapsulated with sqlite. With sqlite you don't need to setup a
-# database, and you can  just run it without thinking about the overhead.
-
-
 class DB:
     def __init__(self):
         pass

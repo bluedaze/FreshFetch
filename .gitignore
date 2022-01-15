@@ -2,3 +2,4 @@ credentials.py
 stored_object.pickle
 __pycache__/
 .idea/
+.gitupdate

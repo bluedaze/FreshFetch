@@ -7,11 +7,11 @@ h1 {
 
 .table-header {
     color: #ffc107;
-    border:none;
+    border:none !important;
 }
 
 th {
-    border:none;
+    border:none !important;
 }
 
 

@@ -7,9 +7,6 @@ from debugTools import debug_status, load_pickle, save_pickle
 from psdb import *
 from urllib.parse import urlparse, parse_qs
 import logging
-import sys
-
-logging.basicConfig(level=logging.DEBUG)
 
 
 class RedditRequest:
@@ -81,10 +78,10 @@ class ParseResponse:
         self.parse_data()
 
     def parse_data(self):
-        logging.debug(f"{__name__}")
-        logging.debug(f"{__class__.__name__}")
-        logging.debug(f"{__class__}")
-        logging.debug(f"{sys._getframe(1).f_lineno}")
+        # logging.debug(f"{__name__}")
+        # logging.debug(f"{__class__.__name__}")
+        # logging.debug(f"{__class__}")
+        # logging.debug(f"{sys._getframe(1).f_lineno}")
         count = 0
         for thread in self.data:
             count = count + 1
@@ -132,6 +129,7 @@ class ParseResponse:
         )
         response_data = requests.get(target_url)
         if response_data.status_code == 200:
+            logging.debug(f"Request Status: {response_data.status_code}")
             return False
         else:
             logging.debug("Success status not returned.".format(len(ytid)))
@@ -143,12 +141,6 @@ class ParseResponse:
         # Sometimes this will return data similar to the following:
         # 'watch?v=jR4AG5LdKYE'
         # We split based on the equations sign because that's easy.
-        # ytid = thread["url"].split("/")[-1]
-        # if ytid.find("=") >= 0:
-        #     ytid = ytid.split("=")[1]
-        # if ytid.find("&amp;") > 0:
-        #     ytid = ytid.split("&amp;")[0]
-        # return ytid
         u_pars = urlparse(thread["url"])
         quer_v = parse_qs(u_pars.query).get('v')
         if quer_v:
@@ -161,9 +153,7 @@ class ParseResponse:
         ytid = self.sanitize_youtube_id(thread)
         isDeleted = self.yt_is_deleted(ytid)
         if (len(ytid) != 11) or isDeleted:
-            logging.debug(f"id {ytid} is {len(ytid)} characters long")
-            logging.debug(f"Invalid url: {thread['url']}")
-            logging.debug("~" * 20)
+            logging.debug(f"id {ytid} is {len(ytid)} characters long\n Invalid url: {thread['url']}")
             return None
         else:
             thread["url"] = f"https://www.youtube.com/watch?v={ytid}"
