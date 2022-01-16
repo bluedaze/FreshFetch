@@ -2,9 +2,10 @@ import psycopg2
 import psycopg2.extras
 from credentials import db_password
 from datetime import datetime
-import datetime as DT
+import datetime as dt
 from operator import itemgetter
 import logging
+
 
 class DB:
     def __init__(self):
@@ -25,10 +26,10 @@ class DB:
         # This is much easier to parse in table.html than the tuples
         # that it was originally returning.
         now = datetime.now()
-        numDays = 14
-        if numDays > 30:
-            numDays = 30
-        week_ago = now - DT.timedelta(days=numDays)
+        num_days = 14
+        if num_days > 30:
+            num_days = 30
+        week_ago = now - dt.timedelta(days=num_days)
         with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
             cur.execute(
                 f"SELECT * FROM {item_type} WHERE ts BETWEEN %s and %s;",
@@ -79,7 +80,7 @@ class DB:
             conn.commit()
 
     @staticmethod
-    def createDatabase(key):
+    def create_database(key):
         conn = psycopg2.connect(
             user="sean",
             password=db_password,
@@ -88,9 +89,10 @@ class DB:
             database="sean",
         )
         with conn, conn.cursor() as cur:
-            cur = conn.cursor()
+            conn.cursor()
             cur.execute(
-                f"CREATE TABLE {key} (reddit_id TEXT UNIQUE, tag TEXT, url TEXT, image TEXT, name TEXT, text TEXT, ytid TEXT, ups SMALLINT, ts TIMESTAMP, reddit_url TEXT);"
+                f"CREATE TABLE {key} (reddit_id TEXT UNIQUE, tag TEXT, url TEXT, image "
+                f"TEXT, name TEXT, text TEXT, ytid TEXT, ups SMALLINT, ts TIMESTAMP, reddit_url TEXT);"
             )
             conn.commit()
 
@@ -101,5 +103,5 @@ class DB:
 
     def db_create_database(self, response):
         for key, value in response.items():
-            self.createDatabase(key)
+            self.create_database(key)
             self.insert(key, value)

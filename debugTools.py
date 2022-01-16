@@ -1,4 +1,6 @@
 import pickle
+
+
 # The pickle stuff is pretty useful for rapid prototyping
 # if you don't want to go through the effort of setting up
 # a database.
@@ -9,7 +11,7 @@ import pickle
 # Debug variable.
 # "save" to go fetch data from the api
 # "load" to use a pickle that you already have
-class Debugger():
+class Debugger:
     def __init__(self, status):
         self.status = status
 

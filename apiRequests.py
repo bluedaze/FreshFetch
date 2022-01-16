@@ -1,10 +1,10 @@
 import requests.auth
 import requests
-from credentials import *
+from credentials import CLIENT_ID, SECRET_TOKEN
 from parser import Parser
-from requests.exceptions import *
-from debugTools import *
-from psdb import *
+from requests.exceptions import HTTPError
+from debugTools import Debugger
+from psdb import DB
 from urllib.parse import urlparse, parse_qs
 import logging
 

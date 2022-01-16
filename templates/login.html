@@ -6,9 +6,20 @@
       <H1 class="rockSalt">Please Login</H1>
       <hr>
       <form action="" method="post">
-        <input type="text" placeholder="Username" name="username" value="{{request.form.username }}">
-        <input type="password" placeholder="Password" name="password" value="{{request.form.password }}">
+          <input type="text" placeholder="Username" name="username" value="{{request.form.username }}">
+          <input type="password" placeholder="Password" name="password" value="{{request.form.password }}">
+          <input class="btn btn-default" type="submit" value="Login">
       </form>
+          {% if error %}
+            <p class="error">
+                    <<font color= "red">
+                        <strong>
+                            Error:
+                        </strong>
+                        {{ error }}
+                    </font>
+            </p>
+          {% endif %}
       </div>
 </body>
 </html>

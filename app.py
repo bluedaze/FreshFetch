@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.INFO, format='%(lineno)d:\n %(message)s')
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("apscheduler").setLevel(logging.WARNING)
-logging.info("Starting")
+
 
 if __name__ == "__main__":
     send_request()
