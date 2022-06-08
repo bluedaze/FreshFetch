@@ -1,6 +1,6 @@
 import psycopg2
 import psycopg2.extras
-from credentials import db_password
+from Refetcher.credentials import db_password
 from datetime import datetime
 import datetime as dt
 from operator import itemgetter
@@ -26,9 +26,9 @@ class DB:
         # This is much easier to parse in table.html than the tuples
         # that it was originally returning.
         now = datetime.now()
-        num_days = 14
+        num_days = 7
         if num_days > 30:
-            num_days = 30
+            num_days = 7
         week_ago = now - dt.timedelta(days=num_days)
         with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
             cur.execute(

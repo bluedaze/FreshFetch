@@ -18,6 +18,7 @@ class RedditRequest:
         self.make_requests()
 
     def get_token(self):
+        ''' gets oauth token '''
         client_auth = requests.auth.HTTPBasicAuth(CLIENT_ID, SECRET_TOKEN)
         post_data = {"grant_type": "client_credentials"}
         response = requests.post(
@@ -34,6 +35,7 @@ class RedditRequest:
         }
 
     def request_posts(self):
+        ''' requests posts from subreddit '''
         self.get_token()
         api = "https://oauth.reddit.com"
         res = requests.get(
@@ -45,6 +47,7 @@ class RedditRequest:
         return response
 
     def parse_response(self, response):
+        ''' sends every item to the parser, then adds the result to a dictionary'''
         for item in response:
             if item["data"]["ups"] > 10:
                 thread = Parser(item).parse()
@@ -78,10 +81,6 @@ class ParseResponse:
         self.parse_data()
 
     def parse_data(self):
-        # logging.debug(f"{__name__}")
-        # logging.debug(f"{__class__.__name__}")
-        # logging.debug(f"{__class__}")
-        # logging.debug(f"{sys._getframe(1).f_lineno}")
         count = 0
         for thread in self.data:
             count = count + 1
@@ -98,7 +97,8 @@ class ParseResponse:
         }
         self.data = data_dict
 
-    def get_best_thumbnail(self, video_id, is_live=False):
+    def get_thumbnail_urls(self, video_id):
+        is_live = False
         thumbnail_names = [
             "maxresdefault", "hq720", "sddefault", "sd1", "sd2", "sd3", "hqdefault", "hq1", "hq2", "hq3", "0",
             "mqdefault", "mq1", "mq2", "mq3", "default", "1", "2", "3"
@@ -114,6 +114,10 @@ class ParseResponse:
             for name in thumbnail_names
             for ext in ("webp", "jpg")
         ]
+        return thumbnail_urls
+
+    def get_best_thumbnail(self, video_id):
+        thumbnail_urls = self.get_thumbnail_urls(video_id)
 
         for url in thumbnail_urls:
             try:
@@ -136,11 +140,9 @@ class ParseResponse:
             return True
 
     def sanitize_youtube_id(self, thread):
-        # This will work even on youtu.be domains.
-        # We split to get the youtube_id at the end of the url.
-        # Sometimes this will return data similar to the following:
-        # 'watch?v=jR4AG5LdKYE'
-        # We split based on the equations sign because that's easy.
+        # There are several different kinds of youtube
+        # urls so we use this function to ensure
+        # that we use the same format every time.
         u_pars = urlparse(thread["url"])
         quer_v = parse_qs(u_pars.query).get('v')
         if quer_v:
@@ -170,7 +172,6 @@ class ParseResponse:
     def configure_track(self, thread):
         # This function is probably unnecessary
         # But I didn't like how there were several
-        # But I didn't like how there were several
         # url formats for YouTube links.
         is_youtube = thread["url"].find("youtu")
         if is_youtube >= 0:
@@ -183,11 +184,15 @@ def request_reddit_api():
     return response.data
 
 def send_request():
+    # We use this so that we don't hammer Reddit with API requests.
     debug = Debugger("save")
     if debug.status == "load":
         debug.load_pickle()
-    elif debug.status == "save":
+    else:
         response = request_reddit_api()
         debug.save_pickle(response)
         db = DB()
         db.db_insert_response(response)
+
+if __name__ == "__main__":
+    send_request()

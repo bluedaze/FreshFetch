@@ -1,6 +1,6 @@
 from flask import Flask, render_template, redirect, url_for, request
 import uuid
-from psdb import DB
+from Refetcher.psdb import DB
 app = Flask(__name__)
 
 

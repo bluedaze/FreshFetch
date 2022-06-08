@@ -4,6 +4,7 @@ class Tokenizer:
         self.construct_token(child)
         self.pos = 0
         self.char = ""
+        self.tokens = self.parse_text()
 
     def spawn_thread(self):
         thread = {
@@ -83,12 +84,12 @@ class Tokenizer:
         return self.thread
 
 
-class Parser:
+class Parser(Tokenizer):
     def __init__(self, child):
-        self.thread = Tokenizer(child).parse_text()
+        super().__init__(child)
         self.tokens = self.thread["tokens"]
         self.pos = 0
-        self.currentToken = self.thread["tokens"][self.pos]
+        self.currentToken = self.tokens[self.pos]
 
     def parse_parens(self):
         comment = ""
