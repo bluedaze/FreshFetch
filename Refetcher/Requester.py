@@ -1,13 +1,15 @@
 import requests.auth
 import requests
-from credentials import CLIENT_ID, SECRET_TOKEN
+import os
 from parser import Parser
 from requests.exceptions import HTTPError
 from debugTools import Debugger
 from psdb import DB
 from urllib.parse import urlparse, parse_qs
 import logging
-
+CLIENT_ID = os.environ['CLIENT_ID']
+SECRET_TOKEN = os.environ["SECRET_TOKEN"]
+db_password = os.environ["db_password"]
 
 class RedditRequest:
     def __init__(self):

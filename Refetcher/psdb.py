@@ -1,10 +1,13 @@
 import psycopg2
 import psycopg2.extras
-from Refetcher.credentials import db_password
 from datetime import datetime
 import datetime as dt
 from operator import itemgetter
 import logging
+import os
+CLIENT_ID = os.environ['CLIENT_ID']
+SECRET_TOKEN = os.environ["SECRET_TOKEN"]
+db_password = os.environ["db_password"]
 
 
 class DB:
