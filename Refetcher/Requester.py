@@ -1,15 +1,16 @@
 import requests.auth
 import requests
-import os
+from dotenv import dotenv_values
 from parser import Parser
 from requests.exceptions import HTTPError
 from debugTools import Debugger
 from psdb import DB
 from urllib.parse import urlparse, parse_qs
 import logging
-CLIENT_ID = os.environ['CLIENT_ID']
-SECRET_TOKEN = os.environ["SECRET_TOKEN"]
-db_password = os.environ["db_password"]
+config = dotenv_values('../.env')
+CLIENT_ID = config['CLIENT_ID']
+SECRET_TOKEN = config["SECRET_TOKEN"]
+db_password = config["db_password"]
 
 class RedditRequest:
     def __init__(self):

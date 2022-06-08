@@ -4,10 +4,11 @@ from datetime import datetime
 import datetime as dt
 from operator import itemgetter
 import logging
-import os
-CLIENT_ID = os.environ['CLIENT_ID']
-SECRET_TOKEN = os.environ["SECRET_TOKEN"]
-db_password = os.environ["db_password"]
+from dotenv import dotenv_values
+config = dotenv_values('../.env')
+CLIENT_ID = config['CLIENT_ID']
+SECRET_TOKEN = config["SECRET_TOKEN"]
+db_password = config["db_password"]
 
 
 class DB:
