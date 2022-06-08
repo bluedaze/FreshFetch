@@ -1,8 +1,9 @@
 from flask import Flask, render_template, redirect, url_for, request
 import uuid
+import sys
+sys.path.append("..")
 from Refetcher.psdb import DB
 app = Flask(__name__)
-
 
 @app.route("/")
 @app.route("/index")
