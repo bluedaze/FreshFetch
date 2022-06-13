@@ -1,14 +1,15 @@
 from flask import Flask, render_template, redirect, url_for, request
 import uuid
-import sys
-sys.path.append("..")
 from Refetcher.psdb import DB
+from Refetcher.environment import get_env
 app = Flask(__name__)
+
 
 @app.route("/")
 @app.route("/index")
 def index():
-    db = DB()
+    config = get_env()
+    db = DB(config["db_password"])
     response = db.query()
     # The list of tracks is almost always larger than tracks
     # so we delete them so that the lists are the same size.
@@ -39,7 +40,8 @@ def login():
 
 
 def data_json():
-    db = DB()
+    config = get_env()
+    db = DB(config["db_password"])
     response = db.query()
     response = {"albums": response.albums, "tracks": response.tracks}
     if __name__ == "__main__":

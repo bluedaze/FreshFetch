@@ -4,21 +4,16 @@ from datetime import datetime
 import datetime as dt
 from operator import itemgetter
 import logging
-from dotenv import dotenv_values
-config = dotenv_values('../.env')
-CLIENT_ID = config['CLIENT_ID']
-SECRET_TOKEN = config["SECRET_TOKEN"]
-db_password = config["db_password"]
 
 
 class DB:
-    def __init__(self):
-        pass
+    def __init__(self, db_password):
+        self.db_password = db_password
 
     def create_con(self):
         conn = psycopg2.connect(
             user="sean",
-            password=db_password,
+            password=self.db_password,
             host="localhost",
             port="5432",
             database="sean",
@@ -84,7 +79,7 @@ class DB:
             conn.commit()
 
     @staticmethod
-    def create_database(key):
+    def create_database(key, db_password):
         conn = psycopg2.connect(
             user="sean",
             password=db_password,

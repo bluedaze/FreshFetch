@@ -1,19 +1,13 @@
-import os
-path = "/home/refresher/Refresher/Refetcher"
-os.chdir(path)
 import requests.auth
 import requests
-from dotenv import dotenv_values
 from parser import Parser
 from requests.exceptions import HTTPError
 from debugTools import Debugger
 from psdb import DB
 from urllib.parse import urlparse, parse_qs
 import logging
-config = dotenv_values('../.env')
-CLIENT_ID = config['CLIENT_ID']
-SECRET_TOKEN = config["SECRET_TOKEN"]
-db_password = config["db_password"]
+from environment import get_env
+
 
 class RedditRequest:
     def __init__(self):
@@ -25,6 +19,9 @@ class RedditRequest:
 
     def get_token(self):
         ''' gets oauth token '''
+        config = get_env()
+        CLIENT_ID = config['CLIENT_ID']
+        SECRET_TOKEN = config["SECRET_TOKEN"]
         client_auth = requests.auth.HTTPBasicAuth(CLIENT_ID, SECRET_TOKEN)
         post_data = {"grant_type": "client_credentials"}
         response = requests.post(
@@ -197,7 +194,8 @@ def send_request():
     else:
         response = request_reddit_api()
         debug.save_pickle(response)
-        db = DB()
+        config = get_env()
+        db = DB(config["db_password"])
         db.db_insert_response(response)
 
 if __name__ == "__main__":
