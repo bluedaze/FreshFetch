@@ -1,5 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, request
 import uuid
+import sys
+sys.path.append("..")
 from Refetcher.psdb import DB
 from Refetcher.environment import get_env
 app = Flask(__name__)
