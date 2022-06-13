@@ -1,3 +1,6 @@
+import os
+path = "/home/refresher/Refresher/Refetcher"
+os.chdir(path)
 import requests.auth
 import requests
 from dotenv import dotenv_values
