@@ -6,6 +6,6 @@ def get_env():
     cwd = os.getcwd()
     working_path = abspath(__file__)
     os.chdir(dirname(working_path))
-    config = dotenv_values('Reserver/.env')
+    config = dotenv_values('.env')
     os.chdir(cwd)
     return config

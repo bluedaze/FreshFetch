@@ -6,7 +6,7 @@ from debugTools import Debugger
 from urllib.parse import urlparse, parse_qs
 import logging
 from environment import get_env
-from Reserver.psdb import DB
+from psdb import DB
 
 
 class RedditRequest:
