@@ -4,11 +4,13 @@ from datetime import datetime
 import datetime as dt
 from operator import itemgetter
 import logging
+from Reserver.environment import get_env
 
 
 class DB:
-    def __init__(self, db_password):
-        self.db_password = db_password
+    def __init__(self):
+        config = get_env()
+        self.db_password = config["db_password"]
 
     def create_con(self):
         conn = psycopg2.connect(

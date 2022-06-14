@@ -3,10 +3,10 @@ import requests
 from parser import Parser
 from requests.exceptions import HTTPError
 from debugTools import Debugger
-from psdb import DB
 from urllib.parse import urlparse, parse_qs
 import logging
-from environment import get_env
+from Reserver.environment import get_env
+from Reserver.psdb import DB
 
 
 class RedditRequest:
@@ -62,9 +62,7 @@ class RedditRequest:
         # Supposedly this is around 1,000 returned results.
         # I suspect this isn't true. I think instead you are only allowed to search up to 1,000
         # posts back - starting with the most recent post.
-        count = 0
         for i in range(3):
-            count += 1
             request = self.request_posts()
             response = request["data"]["children"]
             self.parse_response(response)
@@ -84,9 +82,7 @@ class ParseResponse:
         self.parse_data()
 
     def parse_data(self):
-        count = 0
         for thread in self.data:
-            count = count + 1
             if thread["tag"] == "FRESH":
                 self.configure_track(thread)
             elif thread["tag"] == "FRESH VIDEO":
@@ -195,7 +191,7 @@ def send_request():
         response = request_reddit_api()
         debug.save_pickle(response)
         config = get_env()
-        db = DB(config["db_password"])
+        db = DB()
         db.db_insert_response(response)
 
 if __name__ == "__main__":
