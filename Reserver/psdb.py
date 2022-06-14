@@ -4,8 +4,7 @@ from datetime import datetime
 import datetime as dt
 from operator import itemgetter
 import logging
-from Reserver.environment import get_env
-
+from environment import get_env
 
 class DB:
     def __init__(self):

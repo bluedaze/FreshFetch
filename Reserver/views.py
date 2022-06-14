@@ -1,7 +1,6 @@
 from flask import Flask, render_template, redirect, url_for, request
 import uuid
-import sys
-from Reserver.psdb import DB
+from psdb import DB
 app = Flask(__name__)
 
 
