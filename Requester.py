@@ -1,5 +1,7 @@
 import requests.auth
 import requests
+import sys
+sys.path.insert(0,'..')
 from parser import Parser
 from requests.exceptions import HTTPError
 from debugTools import Debugger
